@@ -2,12 +2,17 @@
 
 FROM python:3.9.2
 
-WORKDIR python-docker
+WORKDIR app
 
 COPY requirements.txt requirements.txt
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt 
+RUN wget https://stockfishchess.org/files/stockfish-10-linux.zip
+RUN unzip stockfish-10-linux.zip
+RUN chmod +x stockfish-10-linux/Linux/stockfish_10_x64
 
 COPY . .
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+ENV PYTHONUNBUFFERED="true"
+
+CMD [ "python3", "-u", "app.py"]
