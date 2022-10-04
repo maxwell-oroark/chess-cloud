@@ -1,6 +1,4 @@
 import threading
-from time import sleep
-
 import chess
 import chess.engine
 import chess.pgn
