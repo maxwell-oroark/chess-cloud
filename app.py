@@ -3,7 +3,9 @@ from time import sleep
 
 import chess
 import chess.engine
-from flask import Flask
+import chess.pgn
+
+from flask import Flask, request
 
 
 def write_ascii_board(board):
@@ -11,31 +13,36 @@ def write_ascii_board(board):
     print(board, file=open("ascii.txt", "a"))
 
 
-def analyze_game(pgn):
-    board = chess.Board()
+def analyze_game(game):
+    analysis = []
+    # connect to stockfish binary
     engine = chess.engine.SimpleEngine.popen_uci(
         "stockfish-10-linux/Linux/stockfish_10_x64"
     )
-    sleep(10)
-    board.push_san("e4")
-    board.push_san("e5")
-    board.push_san("Qh5")
-    info = engine.analyse(board, chess.engine.Limit(time=0.1))["score"]
-    board.push_san("Nc6")
-    board.push_san("Bc4")
-    board.push_san("Nf6")
-    board.push_san("Qxf7")
-    write_ascii_board(board)
+    # iterate through all moves, play them on a board and analyse them.
+    board = game.board()
+    for move in game.mainline_moves():
+        board.push(move)
+        info = engine.analyse(board, chess.engine.Limit(time=0.1))["score"]
+        analysis.append(
+            {"move": move.uci(), "score": info.white().score(mate_score=10000)}
+        )
+
     engine.quit()
+    print("ANALYSIS")
+    print(analysis)
+    return analysis
 
 
 app = Flask(__name__)
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def process_job():
-    print("hello")
-    thread = threading.Thread(target=analyze_game, kwargs={"pgn": "some_long_pgn"})
+    pgn = open("sample.pgn", "r")
+    print(pgn)
+    game = chess.pgn.read_game(pgn)
+    thread = threading.Thread(target=analyze_game, args=(game,))
     thread.start()
     return "processing job...", 200
 
