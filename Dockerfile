@@ -13,6 +13,4 @@ RUN chmod +x stockfish-10-linux/Linux/stockfish_10_x64
 
 COPY . .
 
-ENV PYTHONUNBUFFERED="true"
-
 CMD [ "python3", "-u", "app.py"]
