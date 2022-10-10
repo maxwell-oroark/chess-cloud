@@ -8,6 +8,7 @@ from flask import Flask, request
 
 def write_ascii_board(board):
     print("getting here?")
+    # line below creates ascii file and appends to it.
     print(board, file=open("ascii.txt", "a"))
 
 
@@ -15,7 +16,7 @@ def analyze_game(game):
     analysis = []
     # connect to stockfish binary
     engine = chess.engine.SimpleEngine.popen_uci(
-        "stockfish-10-linux/Linux/stockfish_10_x64"
+        "../stockfish-10-linux/Linux/stockfish_10_x64"
     )
     # iterate through all moves, play them on a board and analyse them.
     board = game.board()
@@ -37,7 +38,8 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def process_job():
-    pgn = open("sample.pgn", "r")
+    pgn = open("../sample.pgn", "r")
+    print("PGN:")
     print(pgn)
     game = chess.pgn.read_game(pgn)
     thread = threading.Thread(target=analyze_game, args=(game,))

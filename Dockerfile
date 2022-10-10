@@ -2,8 +2,6 @@
 
 FROM python:3.9.2
 
-WORKDIR app
-
 COPY requirements.txt requirements.txt
 
 RUN pip3 install -r requirements.txt 
@@ -13,4 +11,8 @@ RUN chmod +x stockfish-10-linux/Linux/stockfish_10_x64
 
 COPY . .
 
-CMD [ "python3", "-u", "app.py"]
+ENV PYTHONUNBUFFERED="true"
+
+WORKDIR app
+
+CMD [ "python3", "-u", "main.py"]
