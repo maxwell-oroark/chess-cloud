@@ -1,15 +1,36 @@
-import threading
+import io
+import json
 import chess
 import chess.engine
 import chess.pgn
 
 from flask import Flask, request
+from google.cloud import storage
+
+storage_client = storage.Client()
+
+app = Flask(__name__)
 
 
-def write_ascii_board(board):
-    print("getting here?")
-    # line below creates ascii file and appends to it.
-    print(board, file=open("ascii.txt", "a"))
+def get_pgn(filename):
+    bucket = storage_client.get_bucket("raw_games")
+    blob = bucket.blob(filename)
+    blob.download_to_filename("/tmp/game.pgn")
+    f = open("/tmp/game.pgn")
+    return f
+
+
+def write_results(results):
+    try:
+        """Uploads json to the bucket."""
+        results_json = json.dumps(results)
+        bucket = storage_client.get_bucket("analyzed_games")
+        blob = bucket.blob("sample_analyzed.json")
+        blob.upload_from_string(results_json)
+        print("file uploaded")
+    except Exception as e:
+        print("something went wrong while attempting to write to GCS:")
+        print(e.message)
 
 
 def analyze_game(game):
@@ -28,23 +49,22 @@ def analyze_game(game):
         )
 
     engine.quit()
-    print("ANALYSIS")
-    print(analysis)
     return analysis
 
 
-app = Flask(__name__)
-
-
-@app.route("/", methods=["GET", "POST"])
+@app.route("/", methods=["POST"])
 def process_job():
-    pgn = open("../sample.pgn", "r")
+    body = request.json
+    print("BODY:")
+    print(body)
+    pgn = get_pgn(body["pgn_file_location"])
     print("PGN:")
     print(pgn)
     game = chess.pgn.read_game(pgn)
-    thread = threading.Thread(target=analyze_game, args=(game,))
-    thread.start()
-    return "processing job...", 200
+    analysis = analyze_game(game)
+    write_results(analysis)
+
+    return "processed job", 200
 
 
 if __name__ == "__main__":
