@@ -12,8 +12,8 @@ project = "chess-365123"
 queue = "games"
 location = "us-central1"
 url = "https://chess-zpmjyzr74q-uc.a.run.app/"
-payload = {"pgn_file_location": "sample.pgn"}
-task_name = "analyze-game-7"
+payload = {"pgn_file_name": "my-unique-id.pgn"}
+task_name = "analyze-game-9"
 
 # Construct the fully qualified queue name.
 parent = client.queue_path(project, location, queue)
