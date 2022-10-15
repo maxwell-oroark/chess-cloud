@@ -6,3 +6,4 @@ MarkupSafe==2.0.1
 Werkzeug==2.0.2
 python-chess
 google-cloud-storage
+requests

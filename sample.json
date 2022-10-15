@@ -1,0 +1,26 @@
+{
+  "id": "yaaIseWA",
+  "rated": true,
+  "variant": "standard",
+  "speed": "blitz",
+  "perf": "blitz",
+  "createdAt": 1664574783338,
+  "lastMoveAt": 1664575008743,
+  "status": "resign",
+  "players": {
+    "white": {
+      "user": { "name": "henrix77", "id": "henrix77" },
+      "rating": 1926,
+      "ratingDiff": 6
+    },
+    "black": {
+      "user": { "name": "moroark", "id": "moroark" },
+      "rating": 1927,
+      "ratingDiff": -7
+    }
+  },
+  "winner": "white",
+  "moves": "e4 e5 Nf3 Nf6 Nxe5 Qe7 Nf3 Qxe4+ Qe2 d5 d3 Qxe2+ Bxe2 Bc5 Nc3 Be6 Bg5 Nbd7 O-O-O d4 Nb5 Bxa2 Nbxd4 O-O-O b3 Nb6 Nb5 Nbd5 Ne5 Ba3+ Nxa3 Nc3 Rde1 Rhe8 Nac4 b5 Bxf6 bxc4 Bxd8 Rxe5 Bg4+ Kxd8 Rxe5 cxb3 Kb2 Na4+ Ka3",
+  "pgn": "[Event \"Rated Blitz game\"]\n[Site \"https://lichess.org/yaaIseWA\"]\n[Date \"2022.09.30\"]\n[White \"henrix77\"]\n[Black \"moroark\"]\n[Result \"1-0\"]\n[UTCDate \"2022.09.30\"]\n[UTCTime \"21:53:03\"]\n[WhiteElo \"1926\"]\n[BlackElo \"1927\"]\n[WhiteRatingDiff \"+6\"]\n[BlackRatingDiff \"-7\"]\n[Variant \"Standard\"]\n[TimeControl \"300+0\"]\n[ECO \"C42\"]\n[Termination \"Normal\"]\n\n1. e4 e5 2. Nf3 Nf6 3. Nxe5 Qe7 4. Nf3 Qxe4+ 5. Qe2 d5 6. d3 Qxe2+ 7. Bxe2 Bc5 8. Nc3 Be6 9. Bg5 Nbd7 10. O-O-O d4 11. Nb5 Bxa2 12. Nbxd4 O-O-O 13. b3 Nb6 14. Nb5 Nbd5 15. Ne5 Ba3+ 16. Nxa3 Nc3 17. Rde1 Rhe8 18. Nac4 b5 19. Bxf6 bxc4 20. Bxd8 Rxe5 21. Bg4+ Kxd8 22. Rxe5 cxb3 23. Kb2 Na4+ 24. Ka3 1-0\n\n\n",
+  "clock": { "initial": 300, "increment": 0, "totalTime": 300 }
+}

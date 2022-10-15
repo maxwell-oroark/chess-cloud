@@ -14,7 +14,7 @@ app = Flask(__name__)
 
 def get_pgn(filename):
     bucket = storage_client.get_bucket("raw_games")
-    blob = bucket.blob(filename)
+    blob = bucket.blob(f"{filename}.pgn")
     blob.download_to_filename("/tmp/game.pgn")
     f = open("/tmp/game.pgn")
     return f
@@ -57,7 +57,7 @@ def process_job():
     body = request.json
     print("BODY:")
     print(body)
-    game_id = body["pgn_file_name"]
+    game_id = body["id"]
     pgn = get_pgn(game_id)
     print("PGN:")
     print(pgn)
