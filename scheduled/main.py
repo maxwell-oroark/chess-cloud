@@ -1,21 +1,14 @@
 import json
 import time
 import requests
-import chess.pgn
 from datetime import datetime, timedelta
-from string import Template
 from google.cloud import storage, tasks_v2
 
 storage_client = storage.Client()
 tasks_client = tasks_v2.CloudTasksClient()
 
-last_hour_date_time = datetime.now() - timedelta(hours=1)
-last_hour_unix = time.mktime(last_hour_date_time.timetuple())
-
-pgns = requests.get(
-    "https://lichess.org/api/games/user/moroark?max=5&pgnInJson=true",
-    headers={"Accept": "application/x-ndjson"},
-)
+last_fifteen_time = datetime.now() - timedelta(minutes=15)
+last_unix = time.mktime(last_fifteen_time.timetuple())
 
 
 def write_game(game):
@@ -57,19 +50,33 @@ def create_task(game):
         # Add the name to tasks.
         task["name"] = tasks_client.task_path(project, location, queue, task_name)
 
-    response = tasks_client.create_task(request={"parent": parent, "task": task})
-    print("Created task {}".format(response.name))
+    try:
+        response = tasks_client.create_task(request={"parent": parent, "task": task})
+        print("Created task {}".format(response.name))
+    except Exception as e:
+        print(e.message)
 
 
-with open("/tmp/games.pgn", "w") as f:
-    f.write(pgns.text)
+def query_games(data, context):
+    print(data)
+    print(context)
+    pgns = requests.get(
+        f"https://lichess.org/api/games/user/moroark?max=5&pgnInJson=true",
+        headers={"Accept": "application/x-ndjson"},
+    )
+    with open("/tmp/games.pgn", "w") as f:
+        f.write(pgns.text)
 
-with open("/tmp/games.pgn", "r") as f:
-    delimiter = "\n"
-    games = [x for x in f.read().split(delimiter) if x]
-    for game in games:
-        game = json.loads(game)
-        write_game(game)
-        create_task(game)
+    with open("/tmp/games.pgn", "r") as f:
+        delimiter = "\n"
+        games = [x for x in f.read().split(delimiter) if x]
+        for game in games:
+            game = json.loads(game)
+            write_game(game)
+            create_task(game)
 
-    print("script executed successfully")
+        print("script executed successfully")
+
+
+if __name__ == "__main__":
+    query_games()
