@@ -24,7 +24,7 @@ def create_task(game):
     location = "us-central1"
     url = "https://chess-zpmjyzr74q-uc.a.run.app/"
     payload = {"id": game["id"]}
-    task_name = None
+    task_name = game["id"]
 
     parent = tasks_client.queue_path(project, location, queue)
     task = {
