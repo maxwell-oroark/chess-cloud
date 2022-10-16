@@ -9,6 +9,7 @@ tasks_client = tasks_v2.CloudTasksClient()
 
 last_fifteen_time = datetime.now() - timedelta(minutes=15)
 last_unix = time.mktime(last_fifteen_time.timetuple())
+unix_ms = int(last_unix * 1000)
 
 
 def write_game(game):
@@ -61,7 +62,7 @@ def query_games(data, context):
     print(data)
     print(context)
     pgns = requests.get(
-        f"https://lichess.org/api/games/user/moroark?max=5&pgnInJson=true",
+        f"https://lichess.org/api/games/user/moroark?max=15&pgnInJson=true&since={unix_ms}",
         headers={"Accept": "application/x-ndjson"},
     )
     with open("/tmp/games.pgn", "w") as f:
@@ -70,12 +71,15 @@ def query_games(data, context):
     with open("/tmp/games.pgn", "r") as f:
         delimiter = "\n"
         games = [x for x in f.read().split(delimiter) if x]
-        for game in games:
-            game = json.loads(game)
-            write_game(game)
-            create_task(game)
+        if len(games) > 0:
+            for game in games:
+                game = json.loads(game)
+                write_game(game)
+                create_task(game)
 
-        print("script executed successfully")
+            print("script executed successfully")
+        else:
+            print("no new games to analyze")
 
 
 if __name__ == "__main__":
