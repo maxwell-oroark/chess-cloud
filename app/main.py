@@ -42,11 +42,10 @@ def analyze_game(game):
     # iterate through all moves, play them on a board and analyse them.
     board = game.board()
     for move in game.mainline_moves():
+        san = board.san(move)
         board.push(move)
         info = engine.analyse(board, chess.engine.Limit(time=0.1))["score"]
-        analysis.append(
-            {"move": board.san(move), "score": info.white().score(mate_score=10000)}
-        )
+        analysis.append({"move": san, "score": info.white().score(mate_score=10000)})
 
     engine.quit()
     return analysis

@@ -59,10 +59,8 @@ def create_task(game):
 
 
 def query_games(data, context):
-    print(data)
-    print(context)
     pgns = requests.get(
-        f"https://lichess.org/api/games/user/moroark?max=15&pgnInJson=true&since={unix_ms}",
+        f"https://lichess.org/api/games/user/moroark?pgnInJson=true&since={unix_ms}",
         headers={"Accept": "application/x-ndjson"},
     )
     with open("/tmp/games.pgn", "w") as f:
