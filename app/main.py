@@ -1,4 +1,3 @@
-import io
 import json
 import chess
 import chess.engine
