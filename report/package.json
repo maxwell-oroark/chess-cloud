@@ -1,6 +1,8 @@
 {
   "dependencies": {
     "@google-cloud/storage": "^6.5.4",
-    "chartjs": "^0.3.24"
+    "chartjs": "^0.3.24",
+    "node-fetch": "^3.2.10",
+    "chartjs-node-canvas": "4.1.6"
   }
 }
