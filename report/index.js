@@ -62,7 +62,7 @@ async function generateReport(file, context) {
     method: "POST",
     body: JSON.stringify({
       type: "mrkdwn",
-      text: "Chess game analysis",
+      text: `${analysis["white_player"]} (${analysis["white_rating"]}) vs. ${analysis["black_player"]} (${analysis["black_rating"]})`,
       attachments: [
         {
           type: "image",

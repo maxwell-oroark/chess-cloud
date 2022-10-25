@@ -44,9 +44,9 @@ def analyze_game(game):
     for move in game.mainline_moves():
         san = board.san(move)
         board.push(move)
-        info = engine.analyse(board, chess.engine.Limit(time=0.1))["score"]
+        info = engine.analyse(board, chess.engine.Limit(time=0.2))["score"]
         analysis.append(
-            {"move": san, "score": info.white().score(mate_score=10000)}
+            {"move": san, "score": info.white().score(mate_score=5000)}
         )
 
     engine.quit()
@@ -56,8 +56,6 @@ def analyze_game(game):
 @app.route("/", methods=["POST"])
 def process_job():
     body = request.json
-    print("BODY:")
-    print(body)
     game_id = body["id"]
     metadata = {
         "game_id": game_id,
@@ -68,8 +66,6 @@ def process_job():
     }
 
     pgn = get_pgn(game_id)
-    print("PGN:")
-    print(pgn)
     game = chess.pgn.read_game(pgn)
     analysis = analyze_game(game)
     metadata["analysis"] = analysis

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.9.2
+FROM --platform=linux/amd64 python:3.9
 
 COPY requirements.txt requirements.txt
 

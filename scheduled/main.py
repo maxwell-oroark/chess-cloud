@@ -1,5 +1,4 @@
 import json
-import time
 import requests
 from datetime import datetime, timedelta
 from google.cloud import storage, tasks_v2
@@ -9,6 +8,8 @@ tasks_client = tasks_v2.CloudTasksClient()
 
 fifteen_minutes_ago = datetime.now() - timedelta(minutes=15)
 fifteen_minutes_ago_ms = int(fifteen_minutes_ago.timestamp() * 1000)
+
+users = ["moroark", ]
 
 
 def write_game(game):
@@ -59,14 +60,18 @@ def create_task(game):
 
 
 def query_games(data, context):
-    pgns = requests.get(
-        f"https://lichess.org/api/games/user/moroark?pgnInJson=true&since={fifteen_minutes_ago_ms}",
-        headers={"Accept": "application/x-ndjson"},
-    )
-    with open("/tmp/games.pgn", "w") as f:
-        f.write(pgns.text)
+    games = ""
+    for user in users:
+        response = requests.get(
+            f"https://lichess.org/api/games/user/{user}?pgnInJson=true&since={fifteen_minutes_ago_ms}",
+            headers={"Accept": "application/x-ndjson"},
+        )
+        games += response.text
 
-    with open("/tmp/games.pgn", "r") as f:
+    with open("/tmp/games.ndjson", "w") as f:
+        f.write(games)
+
+    with open("/tmp/games.ndjson", "r") as f:
         delimiter = "\n"
         games = [x for x in f.read().split(delimiter) if x]
         if len(games) > 0:
