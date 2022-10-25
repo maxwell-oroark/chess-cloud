@@ -7,9 +7,8 @@ from google.cloud import storage, tasks_v2
 storage_client = storage.Client()
 tasks_client = tasks_v2.CloudTasksClient()
 
-last_fifteen_time = datetime.now() - timedelta(minutes=15)
-last_unix = time.mktime(last_fifteen_time.timetuple())
-unix_ms = int(last_unix * 1000)
+fifteen_minutes_ago = datetime.now() - timedelta(minutes=15)
+fifteen_minutes_ago_ms = int(fifteen_minutes_ago.timestamp() * 1000)
 
 
 def write_game(game):
@@ -24,8 +23,13 @@ def create_task(game):
     queue = "games"
     location = "us-central1"
     url = "https://chess-zpmjyzr74q-uc.a.run.app/"
-    payload = {"id": game["id"]}
-    task_name = game["id"]
+    payload = {
+        "id": game["id"],
+        "white_player": game["players"]["white"]["user"]["name"],
+        "black_player": game["players"]["black"]["user"]["name"],
+        "white_rating": game["players"]["white"]["rating"],
+        "black_rating": game["players"]["black"]["rating"],
+    }
 
     parent = tasks_client.queue_path(project, location, queue)
     task = {
@@ -35,21 +39,17 @@ def create_task(game):
             "url": url,  # The full url path that the task will be sent to.
         }
     }
-    if payload is not None:
-        if isinstance(payload, dict):
-            # Convert dict to JSON string
-            payload = json.dumps(payload)
-            # specify http content-type to application/json
-            task["http_request"]["headers"] = {"Content-type": "application/json"}
+    # Convert dict to JSON string
+    payload = json.dumps(payload)
+    # specify http content-type to application/json
+    task["http_request"]["headers"] = {"Content-type": "application/json"}
 
-        # The API expects a payload of type bytes.
-        converted_payload = payload.encode()
+    # The API expects a payload of type bytes.
+    converted_payload = payload.encode()
 
-        # Add the payload to the request.
-        task["http_request"]["body"] = converted_payload
-    if task_name is not None:
-        # Add the name to tasks.
-        task["name"] = tasks_client.task_path(project, location, queue, task_name)
+    # Add the payload to the request.
+    task["http_request"]["body"] = converted_payload
+    task["name"] = tasks_client.task_path(project, location, queue, game["id"])
 
     try:
         response = tasks_client.create_task(request={"parent": parent, "task": task})
@@ -60,7 +60,7 @@ def create_task(game):
 
 def query_games(data, context):
     pgns = requests.get(
-        f"https://lichess.org/api/games/user/moroark?pgnInJson=true&since={unix_ms}",
+        f"https://lichess.org/api/games/user/moroark?pgnInJson=true&since={fifteen_minutes_ago_ms}",
         headers={"Accept": "application/x-ndjson"},
     )
     with open("/tmp/games.pgn", "w") as f:

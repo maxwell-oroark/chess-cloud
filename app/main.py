@@ -20,10 +20,11 @@ def get_pgn(filename):
     return f
 
 
-def write_results(game_id, results):
+def write_results(metadata):
     try:
         """Uploads json to the bucket."""
-        results_json = json.dumps(results)
+        game_id = metadata["game_id"]
+        results_json = json.dumps(metadata)
         bucket = storage_client.get_bucket("analyzed_games")
         blob = bucket.blob(f"{game_id}.json")
         blob.upload_from_string(results_json)
@@ -45,7 +46,9 @@ def analyze_game(game):
         san = board.san(move)
         board.push(move)
         info = engine.analyse(board, chess.engine.Limit(time=0.1))["score"]
-        analysis.append({"move": san, "score": info.white().score(mate_score=10000)})
+        results["analysis"].append(
+            {"move": san, "score": info.white().score(mate_score=10000)}
+        )
 
     engine.quit()
     return analysis
@@ -57,12 +60,21 @@ def process_job():
     print("BODY:")
     print(body)
     game_id = body["id"]
+    metadata = {
+        "game_id": game_id,
+        "white_rating": body["white_rating"],
+        "black_rating": body["black_rating"],
+        "white_player": body["white_player"],
+        "black_player": body["black_player"],
+    }
+
     pgn = get_pgn(game_id)
     print("PGN:")
     print(pgn)
     game = chess.pgn.read_game(pgn)
     analysis = analyze_game(game)
-    write_results(game_id, analysis)
+    metadata["analysis"] = analysis
+    write_results(metadata)
 
     return "processed job", 200
 

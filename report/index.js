@@ -1,7 +1,8 @@
-const { Storage } = require("@google-cloud/storage");
+import fetch from "node-fetch";
+import { Storage } from "@google-cloud/storage";
+import { ChartJSNodeCanvas } from "chartjs-node-canvas";
 const storage = new Storage();
 
-// [START functions_helloworld_storage]
 /**
  * Generic background Cloud Function to be triggered by Cloud Storage.
  * This sample works for all Cloud Storage CRUD operations.
@@ -9,7 +10,33 @@ const storage = new Storage();
  * @param {object} file The Cloud Storage file metadata.
  * @param {object} context The event metadata.
  */
-exports.generateReport = async (file, context) => {
+
+const SLACK_URL = process.env.SLACK_URL;
+
+async function createChart(analysis, chartService) {
+  const moves = analysis["moves"];
+  const title = `${analysis["white_player"]} (${analysis["white_rating"]}) vs. ${analysis["black_player"]} (${analysis["black_rating"]})`;
+  const configuration = {
+    type: "line", // for line chartService
+    data: {
+      labels: moves.map((move) => move.move),
+      datasets: [
+        {
+          label: title,
+          data: moves.map((move) => move.score),
+          fill: false,
+          borderColor: ["rgba(255, 99, 132, 1)"],
+          borderWidth: 1,
+        },
+      ],
+    },
+  };
+
+  const image = await chartService.renderToBuffer(configuration); // converts chart to image
+  return image;
+}
+
+async function generateReport(file, context) {
   console.log(`  Event: ${context.eventId}`);
   console.log(`  Event Type: ${context.eventType}`);
   console.log(`  Bucket: ${file.bucket}`);
@@ -17,7 +44,43 @@ exports.generateReport = async (file, context) => {
   console.log(`  Metageneration: ${file.metageneration}`);
   console.log(`  Created: ${file.timeCreated}`);
   console.log(`  Updated: ${file.updated}`);
-  const data = await storage.bucket(file.bucket).file(file.name).download(); //stream is created
-  console.log(data[0]);
-};
+  const destinationBucket = "processed_chart_images";
+  const buffer = await storage.bucket(file.bucket).file(file.name).download(); //stream is created
+  const analysis = JSON.parse(buffer[0].toString("utf-8"));
+  const chartService = new ChartJSNodeCanvas({
+    width: 1000,
+    height: 1000,
+  });
+
+  const id = file.name.split(".")[0];
+  const image = await createChart(analysis, chartService);
+  await storage.bucket(destinationBucket).file(`${id}.png`).save(image);
+
+  const publicUrl = `https://storage.googleapis.com/${destinationBucket}/${id}.png`;
+
+  fetch(SLACK_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      type: "mrkdwn",
+      text: "Chess game analysis",
+      attachments: [
+        {
+          type: "image",
+          title: {
+            type: "plain_text",
+            text: "analyzed chess chart",
+          },
+          image_url: publicUrl,
+          alt_text: "analysis of chess game depicted by line chart",
+        },
+      ],
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
+}
+
+export { generateReport };
 // [END functions_helloworld_storage]
