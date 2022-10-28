@@ -9,7 +9,17 @@ tasks_client = tasks_v2.CloudTasksClient()
 fifteen_minutes_ago = datetime.now() - timedelta(minutes=15)
 fifteen_minutes_ago_ms = int(fifteen_minutes_ago.timestamp() * 1000)
 
-users = ["moroark", ]
+users = [
+    "moroark",
+]
+
+
+def new_game(game):
+    bucket = storage_client.get_bucket("raw_games")
+    blob = bucket.blob(f"{game['id']}.pgn")
+    if blob.exists():
+        return False
+    return True
 
 
 def write_game(game):
@@ -74,11 +84,15 @@ def query_games(data, context):
     with open("/tmp/games.ndjson", "r") as f:
         delimiter = "\n"
         games = [x for x in f.read().split(delimiter) if x]
+        print("GAMES:")
+        print(len(games))
+        print(games)
         if len(games) > 0:
             for game in games:
                 game = json.loads(game)
-                write_game(game)
-                create_task(game)
+                if new_game(game):
+                    write_game(game)
+                    create_task(game)
 
             print("script executed successfully")
         else:
@@ -86,4 +100,7 @@ def query_games(data, context):
 
 
 if __name__ == "__main__":
-    query_games()
+    print(
+        f"https://lichess.org/api/games/user/moroark?pgnInJson=true&since={fifteen_minutes_ago_ms}"
+    )
+    print(fifteen_minutes_ago_ms)
