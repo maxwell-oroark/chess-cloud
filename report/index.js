@@ -18,6 +18,9 @@ async function createChart(analysis, chartService) {
   const title = `${analysis["white_player"]} (${analysis["white_rating"]}) vs. ${analysis["black_player"]} (${analysis["black_rating"]})`;
   const configuration = {
     type: "line",
+    options: {
+      backgroundColor: "rgba(255, 255, 255, 0.5)",
+    },
     data: {
       labels: moves.map((move) => move.move),
       datasets: [
