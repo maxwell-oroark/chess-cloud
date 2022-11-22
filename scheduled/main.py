@@ -9,9 +9,7 @@ tasks_client = tasks_v2.CloudTasksClient()
 fifteen_minutes_ago = datetime.now() - timedelta(minutes=15)
 fifteen_minutes_ago_ms = int(fifteen_minutes_ago.timestamp() * 1000)
 
-users = [
-    "moroark",
-]
+users = ["moroark", "goroark"]
 
 
 def new_game(game):
@@ -40,6 +38,7 @@ def create_task(game):
         "black_player": game["players"]["black"]["user"]["name"],
         "white_rating": game["players"]["white"]["rating"],
         "black_rating": game["players"]["black"]["rating"],
+        "winner": game["winner"],
     }
 
     parent = tasks_client.queue_path(project, location, queue)
