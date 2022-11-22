@@ -19,7 +19,11 @@ async function createChart(analysis, chartService) {
   const configuration = {
     type: "line",
     options: {
-      backgroundColor: "rgba(255, 255, 255, 0.5)",
+      plugins: {
+        customCanvasBackgroundColor: {
+          color: "#fff",
+        },
+      },
     },
     data: {
       labels: moves.map((move) => move.move),
@@ -33,6 +37,19 @@ async function createChart(analysis, chartService) {
         },
       ],
     },
+    plugins: [
+      {
+        id: "customCanvasBackgroundColor",
+        beforeDraw: (chart, args, options) => {
+          const { ctx } = chart;
+          ctx.save();
+          ctx.globalCompositeOperation = "destination-over";
+          ctx.fillStyle = options.color || "#fff";
+          ctx.fillRect(0, 0, chart.width, chart.height);
+          ctx.restore();
+        },
+      },
+    ],
   };
 
   const image = await chartService.renderToBuffer(configuration); // converts chart to image
