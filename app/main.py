@@ -45,9 +45,7 @@ def analyze_game(game):
         san = board.san(move)
         board.push(move)
         info = engine.analyse(board, chess.engine.Limit(time=0.2))["score"]
-        analysis.append(
-            {"move": san, "score": info.white().score(mate_score=5000)}
-        )
+        analysis.append({"move": san, "score": info.white().score(mate_score=5000)})
 
     engine.quit()
     return analysis
@@ -63,6 +61,7 @@ def process_job():
         "black_rating": body["black_rating"],
         "white_player": body["white_player"],
         "black_player": body["black_player"],
+        "winner": body["winner"],
     }
 
     pgn = get_pgn(game_id)

@@ -15,11 +15,7 @@ const SLACK_URL = process.env.SLACK_URL;
 
 async function createChart(analysis, chartService) {
   const moves = analysis["analysis"];
-  const title = ` ${analysis["winner"].includes("white") ? "👑" : ""} ${
-    analysis["white_player"]
-  } (${analysis["white_rating"]}) vs. ${
-    analysis["winner"].includes("black") ? "👑" : ""
-  } ${analysis["black_player"]} (${analysis["black_rating"]})`;
+  const title = `${analysis["white_player"]} (${analysis["white_rating"]}) vs. ${analysis["black_player"]} (${analysis["black_rating"]})`;
   const configuration = {
     type: "line",
     options: {
@@ -69,7 +65,11 @@ async function generateReport(file, context) {
     method: "POST",
     body: JSON.stringify({
       type: "mrkdwn",
-      text: `${analysis["white_player"]} (${analysis["white_rating"]}) vs. ${analysis["black_player"]} (${analysis["black_rating"]})`,
+      text: `${analysis["winner"].includes("white") ? "👑" : ""}${
+        analysis["white_player"]
+      } (${analysis["white_rating"]}) vs. ${
+        analysis["winner"].includes("black") ? "👑" : ""
+      } ${analysis["black_player"]} (${analysis["black_rating"]})`,
       attachments: [
         {
           type: "image",
