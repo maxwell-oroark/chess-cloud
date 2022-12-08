@@ -34,6 +34,11 @@ async function createChart(analysis, chartService) {
           fill: false,
           borderColor: ["rgba(255, 99, 132, 1)"],
           borderWidth: 1,
+          backgroundColor(context) {
+            const index = context.dataIndex;
+            const value = context.dataset.data[index];
+            return value < 0 ? "black" : "white";
+          },
         },
       ],
     },
@@ -82,7 +87,7 @@ async function generateReport(file, context) {
     method: "POST",
     body: JSON.stringify({
       type: "mrkdwn",
-      text: `${analysis["winner"].includes("white") ? "👑" : ""}${
+      text: `${analysis["winner"].includes("white") ? "👑" : ""} ${
         analysis["white_player"]
       } (${analysis["white_rating"]}) vs. ${
         analysis["winner"].includes("black") ? "👑" : ""
