@@ -21,7 +21,7 @@ async function createChart(analysis, chartService) {
     options: {
       plugins: {
         customCanvasBackgroundColor: {
-          color: "#fff",
+          color: "#d6d6d6",
         },
       },
     },
@@ -41,12 +41,22 @@ async function createChart(analysis, chartService) {
       {
         id: "customCanvasBackgroundColor",
         beforeDraw: (chart, args, options) => {
+          // background color
           const { ctx } = chart;
           ctx.save();
           ctx.globalCompositeOperation = "destination-over";
           ctx.fillStyle = options.color || "#fff";
           ctx.fillRect(0, 0, chart.width, chart.height);
           ctx.restore();
+
+          // line color
+          var data = c.data.datasets[0].data;
+          for (let i in data) {
+            let line = c.data.datasets[0]._meta["0"].data[i]._model;
+            if (data[i] > 0) {
+              line.backgroundColor = "#07C";
+            } else line.backgroundColor = "#E82020";
+          }
         },
       },
     ],
