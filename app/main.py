@@ -45,7 +45,7 @@ def analyze_game(game):
         san = board.san(move)
         board.push(move)
         info = engine.analyse(board, chess.engine.Limit(time=0.2))["score"]
-        analysis.append({"move": san, "score": info.white().score(mate_score=5000)})
+        analysis.append({"move": san, "score": info.white().score(mate_score=1000)})
 
     engine.quit()
     return analysis

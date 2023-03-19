@@ -24,6 +24,24 @@ async function createChart(analysis, chartService) {
           color: "#d6d6d6",
         },
       },
+      scales: {
+        y: {
+          suggestedMin: -1000,
+          suggestedMax: 1000,
+          grid: {
+            color: (context) => {
+              const line = context.tick.value;
+              const lineColor = line === 0 ? "#666" : "#ccc";
+              return lineColor;
+            },
+            lineWidth: (context) => {
+              const line = context.tick.value;
+              const lineColor = line === 0 ? 2 : 1;
+              return lineColor;
+            },
+          },
+        },
+      },
     },
     data: {
       labels: moves.map((move) => move.move),
@@ -42,21 +60,27 @@ async function createChart(analysis, chartService) {
         id: "customCanvasBackgroundColor",
         beforeDraw: (chart, args, options) => {
           // background color
-          const { ctx } = chart;
+          const {
+            ctx,
+            width,
+            height,
+            chartArea,
+            scales: { y },
+          } = chart;
           ctx.save();
           ctx.globalCompositeOperation = "destination-over";
-          ctx.fillStyle = options.color || "#fff";
-          ctx.fillRect(0, 0, chart.width, chart.height);
+          // save entire chart canvas as white
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(0, 0, width, height);
+          // layer background negative y-axis gray
+          ctx.fillStyle = options.color || "#d3d3d3";
+          ctx.fillRect(
+            chartArea.left,
+            y.getPixelForValue(0),
+            chartArea.width,
+            chartArea.bottom - y.getPixelForValue(0)
+          );
           ctx.restore();
-
-          // line color
-          var data = c.data.datasets[0].data;
-          for (let i in data) {
-            let line = c.data.datasets[0]._meta["0"].data[i]._model;
-            if (data[i] > 0) {
-              line.backgroundColor = "#07C";
-            } else line.backgroundColor = "#E82020";
-          }
         },
       },
     ],
